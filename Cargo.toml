@@ -1,0 +1,7 @@
+[package]
+name = "mazegenerator"
+version = "0.1.0"
+authors = ["TheRiven <Novajames276@gmail.com>"]
+
+[dependencies]
+image = "0.18"
