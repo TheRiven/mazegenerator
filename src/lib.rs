@@ -45,6 +45,7 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
 
             // Make the chosen cell the new current cell and mark as visted
             current = chosen;
+            visited.push(current);
         } else {
             // If the stack is not empty
             if stack.len() > 0 {
