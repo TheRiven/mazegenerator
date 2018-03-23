@@ -1,13 +1,24 @@
 extern crate mazegenerator;
 
 fn main() {
-    println!("Generating Maze...");
-    let height = 4001;
-    let width = 4001;
-    let maze = mazegenerator::generate_maze(height, width);
-    println!("Maze Generated", );
+    let height = 4096;
+    let width = 4096;
 
-    println!("Saving image...", );
-    mazegenerator::generate_image(height as u32, width as u32, maze);
-    println!("Image saved!", );
+    let height = if height % 2 == 0 {
+        println!("+1 to height!");
+        height + 1
+    } else {
+        height
+    };
+
+    let width = if width % 2 == 0 {
+        println!("+1 to width!");
+        width + 1
+    } else {
+        width
+    };
+
+    let maze = mazegenerator::create_maze(height, width);
+
+    mazegenerator::save_maze(height, width, maze);
 }

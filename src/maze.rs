@@ -31,13 +31,13 @@ impl Maze {
     pub fn get_cell_neighbours(&self, cell: &Cell) -> Vec<(&Cell, Direction)> {
         let mut neighbours = Vec::new();
 
-        if cell.y < self.height - 1 {
+        if cell.y < self.height - 2 {
             if let Some(s) = self.get_cell(cell.x, cell.y + 2) {
                 neighbours.push((s, Direction::South));
             }
         }
 
-        if cell.x < self.width - 1 {
+        if cell.x < self.width - 2 {
             if let Some(e) = self.get_cell(cell.x + 2, cell.y) {
                 neighbours.push((e, Direction::East));
             }
@@ -58,7 +58,7 @@ impl Maze {
     }
 }
 
-#[derive(Copy, Clone)] 
+#[derive(Copy, Clone)]
 pub enum Direction {
     North,
     East,
@@ -78,18 +78,12 @@ impl Cell {
 }
 
 pub struct Node {
-    x: u64,
-    y: u64,
     wall: bool,
 }
 
 impl Node {
-    pub fn new(x: u64, y: u64, wall: bool) -> Node {
-        Node { x, y, wall }
-    }
-
-    pub fn get_pos(&self) -> (u64, u64) {
-        (self.x, self.y)
+    pub fn new(wall: bool) -> Node {
+        Node { wall }
     }
 
     pub fn is_wall(&self) -> bool {
