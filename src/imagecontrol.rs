@@ -5,16 +5,16 @@ use std::fs::File;
 
 use maze::Node;
 
-pub fn generate_image(height: u32, width: u32, node_map: HashMap<(u64, u64), Node>) {
+pub fn generate_image(height: u32, width: u32, node_map: &HashMap<(u64, u64), Node>) {
     // Create image buffer
     let mut img_buffer = image::ImageBuffer::new(width, height);
 
     // Iterate over the coords and pixels in the image
     for (x, y, pixel) in img_buffer.enumerate_pixels_mut() {
         let position = (x as u64, y as u64);
-        let node = node_map.get(&position).unwrap();
+        let node = node_map.get(&position);
 
-        if node.is_wall() {
+        if node.is_none() {
             *pixel = image::Luma([0u8]);
         } else {
             *pixel = image::Luma([255u8])

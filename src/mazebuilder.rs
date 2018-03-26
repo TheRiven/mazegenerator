@@ -12,17 +12,14 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
     let mut stack: Vec<&Cell> = Vec::new();
 
     // Visted Cells
-    let mut visited: HashMap<(u64, u64), &Cell> = HashMap::with_capacity((height * width) as usize);
+    let mut visited: HashMap<(u64, u64), Node> = HashMap::with_capacity((height * width) as usize);
 
     // Get the inital cell and mark it as visited.
     let mut current = maze.get_cell(1, 1).unwrap();
-    visited.insert((current.x, current.y), current);
+    visited.insert((current.x, current.y), Node::new(false));
 
     // While there are unvisited cells --
     while visited.len() != (height * width) as usize {
-        //let test = create_output_map(height, width, &visited);
-        //generate_image(height as u32, width as u32, test);
-
         // Get the unvisted neighbours for the current cell
         let neighbours = get_cell_neighbours(&maze, current, &visited);
 
@@ -44,11 +41,11 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
                 Direction::West => maze.get_cell(current.x - 1, current.y),
             }.unwrap();
 
-            visited.insert((wall.x, wall.y), wall);
+            visited.insert((wall.x, wall.y), Node::new(false));
 
             // Make the chosen cell the new current cell and mark as visted
             current = chosen;
-            visited.insert((current.x, current.y), current);
+            visited.insert((current.x, current.y), Node::new(false));
         } else {
             // If the stack is not empty
             if stack.len() > 0 {
@@ -62,40 +59,14 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
     }
     println!("Path generation finished.");
 
-    // Return the map of the maze so that it can be converted into a image
-    create_output_map(height, width, &visited)
-}
-
-fn create_output_map(
-    height: u64,
-    width: u64,
-    visited: &HashMap<(u64, u64), &Cell>,
-) -> HashMap<(u64, u64), Node> {
-    // Create output map
-    let mut node_map: HashMap<(u64, u64), Node> = HashMap::with_capacity((height * width) as usize);
-
-    for x in 0..width {
-        for y in 0..height {
-            let mut wall = true;
-
-            if visited.contains_key(&(x, y)) {
-                wall = false;
-            }
-
-            let node = Node::new(wall);
-
-            node_map.insert((x, y), node);
-        }
-    }
-
-    // Return the map of the maze so that it can be converted into a image
-    node_map
+    // Return the path map of the maze so that it can be converted into a image
+    visited
 }
 
 fn get_cell_neighbours<'a>(
     maze: &'a Maze,
     current: &Cell,
-    visited: &HashMap<(u64, u64), &Cell>,
+    visited: &HashMap<(u64, u64), Node>,
 ) -> Vec<(&'a Cell, Direction)> {
     let mut neighbours = maze.get_cell_neighbours(current);
     neighbours.retain(|c| {
