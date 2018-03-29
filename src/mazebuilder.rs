@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 use maze::{Cell, Direction, Maze};
 
-pub fn generate_maze(height: u32, width: u32) -> HashSet<(u32, u32)> {
+pub fn recursive_backtracker(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // Generate a maze with the given width and height
     let maze = Maze::new(height, width);
 
@@ -60,6 +60,21 @@ pub fn generate_maze(height: u32, width: u32) -> HashSet<(u32, u32)> {
     println!("Path generation finished.");
 
     // Return the path map of the maze so that it can be converted into a image
+    visited
+}
+
+fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
+    // List of walls
+
+    // Set of cells 
+
+    // For each wall in some random order
+    // if the cells divided by this wall belong to distinct sets:
+    // remove the current wall.
+    // Join the sets together.
+
+    let visited = HashSet::new();
+
     visited
 }
 
