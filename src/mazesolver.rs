@@ -3,18 +3,18 @@ use std::collections::HashSet;
 use std::collections::VecDeque;
 
 pub fn breadth_first_search<'a>(
-    start: &'a (u64, u64),
-    end: (u64, u64),
-    maze: &'a HashSet<(u64, u64)>,
-) -> Option<Vec<&'a (u64, u64)>> {
+    start: &'a (u32, u32),
+    end: (u32, u32),
+    maze: &'a HashSet<(u32, u32)>,
+) -> Option<Vec<&'a (u32, u32)>> {
     // A FIFO Set
-    let mut open_set: VecDeque<&(u64, u64)> = VecDeque::new();
+    let mut open_set: VecDeque<&(u32, u32)> = VecDeque::new();
 
     // And empy set to maintain visited nodes
-    let mut closed_set: HashSet<&(u64, u64)> = HashSet::new();
+    let mut closed_set: HashSet<&(u32, u32)> = HashSet::new();
 
     // Hashmap containing meta info for path formation
-    let mut meta: HashMap<&(u64, u64), &(u64, u64)> = HashMap::new();
+    let mut meta: HashMap<&(u32, u32), &(u32, u32)> = HashMap::new();
 
     // Setup
     let root = &start;
@@ -54,8 +54,8 @@ pub fn breadth_first_search<'a>(
     None
 }
 
-fn get_node_neighbours(node: (u64, u64), maze: &HashSet<(u64, u64)>) -> Vec<&(u64, u64)> {
-    let mut neighbours: Vec<&(u64, u64)> = Vec::new();
+fn get_node_neighbours(node: (u32, u32), maze: &HashSet<(u32, u32)>) -> Vec<&(u32, u32)> {
+    let mut neighbours: Vec<&(u32, u32)> = Vec::new();
 
     let north = (node.0, node.1 - 1);
     let east = (node.0 + 1, node.1);
@@ -82,11 +82,11 @@ fn get_node_neighbours(node: (u64, u64), maze: &HashSet<(u64, u64)>) -> Vec<&(u6
 }
 
 fn construct_path<'a>(
-    node: &'a (u64, u64),
-    meta: HashMap<&'a (u64, u64), &'a (u64, u64)>,
-) -> Vec<&'a (u64, u64)> {
+    node: &'a (u32, u32),
+    meta: HashMap<&'a (u32, u32), &'a (u32, u32)>,
+) -> Vec<&'a (u32, u32)> {
     // list of vectors that make up the path back to the start
-    let mut path: Vec<&(u64, u64)> = Vec::new();
+    let mut path: Vec<&(u32, u32)> = Vec::new();
 
     // get the parent of the current node from the meta data Hashmap
     let mut current_node = node;

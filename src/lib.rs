@@ -8,7 +8,7 @@ mod mazebuilder;
 mod mazesolver;
 mod imagecontrol;
 
-pub fn create_and_save_maze(maze_height: u64, maze_width: u64) -> HashSet<(u64, u64)> {
+pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, u32)> {
     println!(
         "Generating Maze with height {} and width {}",
         maze_height, maze_width
@@ -38,7 +38,7 @@ pub fn create_and_save_maze(maze_height: u64, maze_width: u64) -> HashSet<(u64, 
     maze
 }
 
-pub fn solve_maze(height: u64, width: u64, maze: &HashSet<(u64, u64)>) {
+pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
     println!("Solving Maze...");
 
     let height = if height % 2 == 0 { height + 1 } else { height };
@@ -67,14 +67,14 @@ pub fn solve_maze(height: u64, width: u64, maze: &HashSet<(u64, u64)>) {
     save_solved_maze(height, width, maze, path.unwrap());
 }
 
-fn save_maze(height: u64, width: u64, maze: &HashSet<(u64, u64)>) {
+fn save_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
     println!("Saving image with height {} and width {}", height, width);
     let timer = Instant::now();
     imagecontrol::generate_image(height as u32, width as u32, maze);
     println!("Image saved in {:?}", timer.elapsed());
 }
 
-fn save_solved_maze(height: u64, width: u64, maze: &HashSet<(u64, u64)>, path: Vec<&(u64, u64)>) {
+fn save_solved_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>, path: Vec<&(u32, u32)>) {
     println!("Saving image with height {} and width {}", height, width);
     let timer = Instant::now();
     imagecontrol::generate_solved_image(height as u32, width as u32, maze, path);

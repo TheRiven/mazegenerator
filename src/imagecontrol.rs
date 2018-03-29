@@ -3,13 +3,13 @@ extern crate image;
 use std::collections::HashSet; 
 use std::fs::File;
 
-pub fn generate_image(height: u32, width: u32, node_map: &HashSet<(u64, u64)>) {
+pub fn generate_image(height: u32, width: u32, node_map: &HashSet<(u32, u32)>) {
     // Create image buffer
     let mut img_buffer = image::ImageBuffer::new(width, height);
 
     // Iterate over the coords and pixels in the image
     for (x, y, pixel) in img_buffer.enumerate_pixels_mut() {
-        let position = (x as u64, y as u64);
+        let position = (x as u32, y as u32);
         let node = node_map.get(&position);
 
         if node.is_none() {
@@ -26,13 +26,13 @@ pub fn generate_image(height: u32, width: u32, node_map: &HashSet<(u64, u64)>) {
         .unwrap();
 }
 
-pub fn generate_solved_image(height: u32, width: u32, node_map: &HashSet<(u64, u64)>, path: Vec<&(u64, u64)>) {
+pub fn generate_solved_image(height: u32, width: u32, node_map: &HashSet<(u32, u32)>, path: Vec<&(u32, u32)>) {
     // Create image buffer
     let mut img_buffer = image::ImageBuffer::new(width, height);
 
     // Iterate over the coords and pixels in the image
     for (x, y, pixel) in img_buffer.enumerate_pixels_mut() {
-        let position = (x as u64, y as u64);
+        let position = (x as u32, y as u32);
         //let node = node_map.get(&position);
 
         if !node_map.contains(&position) {
