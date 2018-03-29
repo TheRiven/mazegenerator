@@ -1,10 +1,10 @@
 use rand::distributions::{IndependentSample, Range};
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 
-use maze::{Cell, Direction, Maze, Node};
+use maze::{Cell, Direction, Maze};
 
-pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
+pub fn generate_maze(height: u64, width: u64) -> HashSet<(u64, u64)> {
     // Generate a maze with the given width and height
     let maze = Maze::new(height, width);
 
@@ -12,11 +12,11 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
     let mut stack: Vec<&Cell> = Vec::new();
 
     // Visted Cells
-    let mut visited: HashMap<(u64, u64), Node> = HashMap::with_capacity((height * width) as usize);
+    let mut visited: HashSet<(u64, u64)> = HashSet::new();
 
     // Get the inital cell and mark it as visited.
     let mut current = maze.get_cell(1, 1).unwrap();
-    visited.insert((current.x, current.y), Node::new(false));
+    visited.insert((current.x, current.y));
 
     // While there are unvisited cells --
     while visited.len() != (height * width) as usize {
@@ -41,11 +41,11 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
                 Direction::West => maze.get_cell(current.x - 1, current.y),
             }.unwrap();
 
-            visited.insert((wall.x, wall.y), Node::new(false));
+            visited.insert((wall.x, wall.y));
 
             // Make the chosen cell the new current cell and mark as visted
             current = chosen;
-            visited.insert((current.x, current.y), Node::new(false));
+            visited.insert((current.x, current.y));
         } else {
             // If the stack is not empty
             if stack.len() > 0 {
@@ -66,14 +66,14 @@ pub fn generate_maze(height: u64, width: u64) -> HashMap<(u64, u64), Node> {
 fn get_cell_neighbours<'a>(
     maze: &'a Maze,
     current: &Cell,
-    visited: &HashMap<(u64, u64), Node>,
+    visited: &HashSet<(u64, u64)>,
 ) -> Vec<(&'a Cell, Direction)> {
     let mut neighbours = maze.get_cell_neighbours(current);
     neighbours.retain(|c| {
         let mut test = true;
         let cell = c.0;
 
-        if visited.contains_key(&(cell.x, cell.y)) {
+        if visited.contains(&(cell.x, cell.y)) {
             test = false;
         }
 

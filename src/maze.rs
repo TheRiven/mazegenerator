@@ -76,17 +76,3 @@ impl Cell {
         Cell { x, y }
     }
 }
-
-pub struct Node {
-    wall: bool,
-}
-
-impl Node {
-    pub fn new(wall: bool) -> Node {
-        Node { wall }
-    }
-
-    pub fn is_wall(&self) -> bool {
-        self.wall
-    }
-}
