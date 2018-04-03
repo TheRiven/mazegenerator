@@ -3,7 +3,6 @@ extern crate rand;
 use std::collections::HashSet;
 use std::time::Instant;
 
-mod maze;
 mod mazebuilder;
 mod mazesolver;
 mod imagecontrol;
@@ -29,8 +28,8 @@ pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, 
     // Setup Timer
     let timer = Instant::now();
 
-    let maze = mazebuilder::recursive_backtracker(height, width);
-    let _maze2 = mazebuilder::kruskal(height, width);
+    let maze = mazebuilder::dfs::recursive_backtracker(height, width);
+    let _maze2 = mazebuilder::kruskal::kruskal(height, width); 
     println!("Maze Generated in {:?}", timer.elapsed());
 
     save_maze(height, width, &maze);
