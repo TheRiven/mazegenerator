@@ -28,8 +28,7 @@ pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, 
     // Setup Timer
     let timer = Instant::now();
 
-    let maze = mazebuilder::dfs::recursive_backtracker(height, width);
-    let _maze2 = mazebuilder::kruskal::kruskal(height, width); 
+    let maze = mazebuilder::generate_maze(mazebuilder::Generator::DFS { height, width });
     println!("Maze Generated in {:?}", timer.elapsed());
 
     save_maze(height, width, &maze);

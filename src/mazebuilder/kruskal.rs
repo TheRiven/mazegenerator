@@ -48,8 +48,14 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
         let neighbours = select_pairs(neighbours);
 
         // if the cells divided by this wall belong to distinct sets:
-        let side1 = cells.remove(&neighbours[0]).unwrap();
-        let side2 = cells.remove(&neighbours[1]).unwrap();
+        let side1 = cells
+            .remove(&neighbours[0])
+            .expect("unable to find set id for neighbour '0'!");
+
+        let side2 = cells
+            .remove(&neighbours[1])
+            .expect("unable to find set id for neighbour '1'!");
+
         if side1 != side2 {
             // remove the current wall
             let old_wall = walls.remove(index);
