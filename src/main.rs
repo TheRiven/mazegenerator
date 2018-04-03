@@ -14,7 +14,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    let height = match args[0].parse::<u64>() {
+    let height = match args[0].parse::<u32>() {
         Ok(num) => num,
         Err(err) => {
             println!("{}", err);
@@ -23,7 +23,7 @@ fn main() {
         }
     };
 
-    let width = match args[1].parse::<u64>() {
+    let width = match args[1].parse::<u32>() {
         Ok(num) => num,
         Err(err) => {
             println!("{}", err);

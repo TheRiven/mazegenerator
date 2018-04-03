@@ -1,11 +1,11 @@
 pub struct Maze {
-    height: u64,
-    width: u64,
+    height: u32,
+    width: u32,
     maze_data: Vec<Cell>,
 }
 
 impl Maze {
-    pub fn new(height: u64, width: u64) -> Maze {
+    pub fn new(height: u32, width: u32) -> Maze {
         let mut maze_data = Vec::with_capacity((height * width) as usize);
 
         for y in 0..height {
@@ -22,7 +22,7 @@ impl Maze {
         }
     }
 
-    pub fn get_cell(&self, x: u64, y: u64) -> Option<(&Cell)> {
+    pub fn get_cell(&self, x: u32, y: u32) -> Option<(&Cell)> {
         let cell = self.maze_data.get((x + y * self.width) as usize);
 
         cell
@@ -58,7 +58,7 @@ impl Maze {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Direction {
     North,
     East,
@@ -67,12 +67,12 @@ pub enum Direction {
 }
 
 pub struct Cell {
-    pub x: u64,
-    pub y: u64,
+    pub x: u32,
+    pub y: u32,
 }
 
 impl Cell {
-    pub fn new(x: u64, y: u64) -> Cell {
+    pub fn new(x: u32, y: u32) -> Cell {
         Cell { x, y }
     }
 }

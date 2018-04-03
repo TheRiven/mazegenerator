@@ -1,10 +1,9 @@
+use std::collections::HashSet;
 use rand::distributions::{IndependentSample, Range};
 
-use std::collections::HashSet;
+use super::maze::{Cell, Direction, Maze};
 
-use maze::{Cell, Direction, Maze};
-
-pub fn generate_maze(height: u64, width: u64) -> HashSet<(u64, u64)> {
+pub fn recursive_backtracker(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // Generate a maze with the given width and height
     let maze = Maze::new(height, width);
 
@@ -12,7 +11,7 @@ pub fn generate_maze(height: u64, width: u64) -> HashSet<(u64, u64)> {
     let mut stack: Vec<&Cell> = Vec::new();
 
     // Visted Cells
-    let mut visited: HashSet<(u64, u64)> = HashSet::new();
+    let mut visited: HashSet<(u32, u32)> = HashSet::new();
 
     // Get the inital cell and mark it as visited.
     let mut current = maze.get_cell(1, 1).unwrap();
@@ -66,7 +65,7 @@ pub fn generate_maze(height: u64, width: u64) -> HashSet<(u64, u64)> {
 fn get_cell_neighbours<'a>(
     maze: &'a Maze,
     current: &Cell,
-    visited: &HashSet<(u64, u64)>,
+    visited: &HashSet<(u32, u32)>,
 ) -> Vec<(&'a Cell, Direction)> {
     let mut neighbours = maze.get_cell_neighbours(current);
     neighbours.retain(|c| {
