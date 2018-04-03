@@ -58,7 +58,7 @@ impl Maze {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Direction {
     North,
     East,
