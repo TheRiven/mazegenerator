@@ -21,29 +21,25 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     let mut cells: HashSet<Rc<Cell>> = HashSet::new();
 
     // Map of Cell sets
-    let mut cell_sets: HashMap<&Rc<Cell>, u32> = HashMap::new();
+    let mut cell_sets: HashMap<Rc<Cell>, u32> = HashMap::new();
 
-    // Create the Cells
+    // Create the Cells and sets
+    let mut id = 1;
     let mut y = 1u32;
     while y < height {
         let mut x = 1u32;
         while x < width {
             let new_cell = Rc::new(Cell { x, y });
-            cells.insert(new_cell);
+            cells.insert(new_cell.clone());
+            cell_sets.insert(new_cell, id);
             x += 2;
+            id += 1;
         }
         y += 1;
     }
 
-    // Create the Cell Sets
-    let mut id = 1;
-    cells.iter().for_each(|cell| {
-        cell_sets.insert(&cell, id);
-        id += 1;
-    });
-
     // List of walls
-    let walls = create_wall_list(&cells);
+    let mut walls = create_wall_list(&cells);
 
     // So long as there are walls left to look at,
     // select a random wall and get the cells it connects
@@ -51,10 +47,14 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // and join the two sets together
 
     while walls.len() > 0 {
-        let wall = pick_random_wall(&walls);
+        let wall = pick_random_wall(&mut walls);
 
-        let cell_a = wall.cell_a.upgrade().expect("Found a wall without a Cell_a");
-        let cell_b = wall.cell_b.upgrade().expect("Found a wall without a Cell_b");
+        let cell_a = wall.cell_a
+            .upgrade()
+            .expect("Found a wall without a Cell_a");
+        let cell_b = wall.cell_b
+            .upgrade()
+            .expect("Found a wall without a Cell_b");
 
         let cell_a_set = cell_sets[&cell_a];
         let cell_b_set = cell_sets[&cell_b];
@@ -62,16 +62,18 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
         if cell_a_set != cell_b_set {
             // Join the sets together here and then add the wall (now cell)
             // to it.
-            
+            let unified_set_id = join_cell_sets(cell_a_set, cell_b_set, &mut cell_sets);
+            let wall_cell = Rc::new(Cell {
+                x: wall.x,
+                y: wall.y,
+            });
+            cells.insert(wall_cell.clone());
+            cell_sets.insert(wall_cell, unified_set_id);
         }
-
-        
     }
 
     // Keep track of what has now been visited
     let visited = HashSet::new();
-
-    
 
     visited
 }
@@ -99,31 +101,43 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
         cell_neighbours.into_iter().for_each(|cell| {
             if !visited.contains(cell) {
                 let mut x = (cell.x - current.x) as i32;
-                if x > 0 { x = x - 1};
-                if x < 0 { x = x + 1};
+                if x > 0 {
+                    x = x - 1
+                };
+                if x < 0 {
+                    x = x + 1
+                };
                 let mut y = (cell.y - current.y) as i32;
-                if y > 0 { y = y - 1};
-                if y < 0 { y = y + 1};
+                if y > 0 {
+                    y = y - 1
+                };
+                if y < 0 {
+                    y = y + 1
+                };
 
                 let x = (current.x as i32 + x) as u32;
                 let y = (current.y as i32 + y) as u32;
 
-                let new_wall = Wall {cell_a: Rc::downgrade(&current), cell_b: Rc::downgrade(&cell), x, y};
+                let new_wall = Wall {
+                    cell_a: Rc::downgrade(&current),
+                    cell_b: Rc::downgrade(&cell),
+                    x,
+                    y,
+                };
                 walls.push(new_wall);
                 cell_stack.push_back(cell);
-            }            
+            }
         });
-
     }
 
     walls
 }
 
-fn pick_random_wall<'a>(walls: &'a Vec<Wall>) -> &'a Wall {
+fn pick_random_wall(walls: &mut Vec<Wall>) -> Wall {
     let between = Range::new(0, walls.len());
     let mut rng = super::rand::thread_rng();
     let random = between.ind_sample(&mut rng) as usize;
-    let chosen = &walls[random];
+    let chosen = walls.remove(random);
 
     chosen
 }
@@ -151,4 +165,15 @@ fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Rc<Cell>>) -> Vec<&'
     }
 
     neighbour_list
+}
+
+fn join_cell_sets(set_a: u32, set_b: u32, sets: &mut HashMap<Rc<Cell>, u32>) -> u32 {
+    // find all of the cells that are in the other set and bring them into the first
+    for (_, value) in sets.iter_mut() {
+        if *value == set_b {
+            *value = set_a;
+        }
+    }
+
+    set_a
 }
