@@ -35,7 +35,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
             x += 2;
             id += 1;
         }
-        y += 1;
+        y += 2;
     }
 
     // List of walls
@@ -72,8 +72,14 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
         }
     }
 
-    // Keep track of what has now been visited
-    let visited = HashSet::new();
+    // All sets should have been joined together at this point, so 
+    // we should now have a map of cells that can be saved and solved
+    // for compatability we currently need to return as a hashset of tuples
+    let mut visited : HashSet<(u32, u32)> = HashSet::new();
+
+    for cell in cells.drain() {
+        visited.insert((cell.x, cell.y));
+    }
 
     visited
 }
@@ -88,7 +94,7 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
     // For each cell, Find its neighbours and create a wall between them
     // then move to the neighbours and repeat untill no more walls can be made.
     let mut cell_stack: VecDeque<&Rc<Cell>> = VecDeque::new();
-    let first_cell = cells.get(&Cell { x: 0, y: 0 }).unwrap();
+    let first_cell = cells.get(&Cell { x: 1, y: 1 }).expect("Unable to find cell 1, 1 in cells set");
     cell_stack.push_back(first_cell);
 
     while cell_stack.len() > 0 {
