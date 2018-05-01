@@ -28,7 +28,8 @@ pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, 
     // Setup Timer
     let timer = Instant::now();
 
-    let maze = mazebuilder::generate_maze(mazebuilder::Generator::DFS { height, width });
+    let generator = select_maze_solver(height, width);
+    let maze = mazebuilder::generate_maze(generator);
     println!("Maze Generated in {:?}", timer.elapsed());
 
     save_maze(height, width, &maze);
@@ -77,4 +78,34 @@ fn save_solved_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>, path: V
     let timer = Instant::now();
     imagecontrol::generate_solved_image(height as u32, width as u32, maze, path);
     println!("Image saved in {:?}", timer.elapsed());
+}
+
+fn select_maze_solver(height: u32, width: u32) -> mazebuilder::Generator {
+    use std::io;
+    let mut input = String::new();
+
+    println!("Which maze generator do you want to use?");
+    println!("1. Depth First Search,");
+    println!("2. Kruskal,");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("select_maze_solver -- unable to parse console input!");
+
+    let option = match input.trim().parse::<u32>() {
+        Ok(num) => num,
+        Err(err) => {
+            println!("Please enter a number! Error: {}", err);
+            std::process::exit(1);
+        }
+    };
+
+    match option {
+        1 => mazebuilder::Generator::DFS {height, width},
+        2 => mazebuilder::Generator::Kruskal {height, width},
+        _ => {
+            println!("unrecognised option {}, defaulting to DFS", option);
+            mazebuilder::Generator::DFS {height, width}
+        }
+    }
+
 }
