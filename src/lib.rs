@@ -3,9 +3,9 @@ extern crate rand;
 use std::collections::HashSet;
 use std::time::Instant;
 
+mod imagecontrol;
 mod mazebuilder;
 mod mazesolver;
-mod imagecontrol;
 
 pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, u32)> {
     println!(

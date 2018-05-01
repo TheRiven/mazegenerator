@@ -26,20 +26,12 @@ fn get_mode_option() -> u32 {
 
     println!("Do you want to:");
     println!("1. Generate a maze and solve it.");
-    println!("2. Generate a maze.");    
+    println!("2. Generate a maze.");
     io::stdin()
         .read_line(&mut input)
         .expect("get_mode_option -- unable to parse console input!");
 
-    let option = match input.trim().parse::<u32>() {
-        Ok(num) => num,
-        Err(err) => {
-            println!("Please enter a number to select the mode! Error: {}", err);
-            std::process::exit(1);
-        }
-    };
-
-    option
+    parse_u32(&input)
 }
 
 fn get_maze_size() -> (u32, u32) {
@@ -49,14 +41,8 @@ fn get_maze_size() -> (u32, u32) {
     io::stdin()
         .read_line(&mut input)
         .expect("get_maze_size -- unable to parse console input!");
-    
-    let height = match input.trim().parse::<u32>() {
-        Ok(num) => num,
-        Err(err) => {
-            println!("Please enter a number, Error: {}", err);
-            std::process::exit(1);
-        }
-    };
+
+    let height = parse_u32(&input);
 
     let mut input = String::new();
 
@@ -64,14 +50,20 @@ fn get_maze_size() -> (u32, u32) {
     io::stdin()
         .read_line(&mut input)
         .expect("get_maze_size -- unable to parse console input!");
-    
-    let width = match input.trim().parse::<u32>() {
+
+    let width = parse_u32(&input);
+
+    (height, width)
+}
+
+fn parse_u32(text: &String) -> u32 {
+    let option = match text.trim().parse::<u32>() {
         Ok(num) => num,
         Err(err) => {
-            println!("Please enter a number, Error: {}", err);
+            println!("Please enter a number! Error: {}", err);
             std::process::exit(1);
         }
     };
 
-    (height, width)
+    option
 }

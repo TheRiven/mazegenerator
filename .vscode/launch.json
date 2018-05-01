@@ -9,7 +9,6 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/mazegenerator.exe",
-            "args": ["10", "10"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
