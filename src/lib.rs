@@ -32,7 +32,6 @@ pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, 
     println!("Maze Generated in {:?}", timer.elapsed());
 
     save_maze(height, width, &maze);
-    solve_maze(height, width, &maze);
 
     maze
 }
