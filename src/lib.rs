@@ -59,11 +59,9 @@ pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
         println!("Something went wrong and no path was found!");
     } else {
         println!("We have a path!");
-    }
-
-    println!("Maze solved in {:?}", timer.elapsed());
-
-    save_solved_maze(height, width, maze, path.unwrap());
+        println!("Maze solved in {:?}", timer.elapsed());
+        save_solved_maze(height, width, maze, path.unwrap());
+    }    
 }
 
 fn save_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
