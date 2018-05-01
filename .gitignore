@@ -2,3 +2,5 @@
 **/*.rs.bk
 maze.png
 /.vscode/
+
+solved-maze\.png
