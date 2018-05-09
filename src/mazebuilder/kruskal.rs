@@ -40,7 +40,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
         y += 2;
     }
 
-    println!("Kruskal - Cell Generation Done in {:?}", timer.elapsed() );
+    println!("Kruskal - Cell Generation Done in {:?}", timer.elapsed());
 
     // List of walls
     let timer = Instant::now();
@@ -54,6 +54,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // and join the two sets together
     let timer = Instant::now();
     while walls.len() > 0 {
+        //println!("Wall Count: {}", walls.len());
         let wall = pick_random_wall(&mut walls);
 
         let cell_a = wall.cell_a
@@ -118,7 +119,9 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
             .expect("No Cell Found in cell_stack!");
         let cell_neighbours = find_cell_neighbours(&current, &cells);
         visited.insert(current);
-        println!("Neighbours: {}", cell_neighbours.len());
+        //println!("Neighbours: {}", cell_neighbours.len());
+
+        //let wall_count_start = walls.len();
 
         cell_neighbours.into_iter().for_each(|cell| {
             if !visited.contains(cell) {
@@ -150,9 +153,14 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
                 cell_stack.push_back(cell);
             }
         });
+
+        //let wall_count_finish = walls.len();
+        //let added_walls = wall_count_finish - wall_count_start;
+        //println!("Added Walls: {}", added_walls);
     }
 
     println!("Visited: {}", visited.len());
+    println!("Walls Generated: {}", walls.len());
 
     walls
 }
