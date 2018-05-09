@@ -53,9 +53,9 @@ mod tests {
     }
 
     #[test]
-    fn test_dfs_30_30() {
-        let test3 = dfs::recursive_backtracker(30, 30);
-        assert_eq!(test3.len(), 449);
+    fn test_dfs_100_100() {
+        let test3 = dfs::recursive_backtracker(100, 100);
+        assert_eq!(test3.len(), 4999);
     }
 
     #[test]
@@ -71,8 +71,8 @@ mod tests {
     }
 
     #[test]
-    fn test_kruskal_30_30() {
-        let test3 = kruskal::kruskal(30, 30);
-        assert_eq!(test3.len(), 449);
+    fn test_kruskal_100_100() {
+        let test3 = kruskal::kruskal(100, 100);
+        assert_eq!(test3.len(), 4999);
     }
 }

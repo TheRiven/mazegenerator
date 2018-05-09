@@ -119,9 +119,6 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
             .expect("No Cell Found in cell_stack!");
         let cell_neighbours = find_cell_neighbours(&current, &cells);
         visited.insert(current);
-        //println!("Neighbours: {}", cell_neighbours.len());
-
-        //let wall_count_start = walls.len();
 
         cell_neighbours.into_iter().for_each(|cell| {
             if !visited.contains(cell) {
@@ -150,16 +147,13 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
                     y,
                 };
                 walls.push(new_wall);
-                cell_stack.push_back(cell);
+                if cell_stack.contains(&cell) == false {
+                    cell_stack.push_back(cell);
+                }
             }
         });
-
-        //let wall_count_finish = walls.len();
-        //let added_walls = wall_count_finish - wall_count_start;
-        //println!("Added Walls: {}", added_walls);
     }
 
-    println!("Visited: {}", visited.len());
     println!("Walls Generated: {}", walls.len());
 
     walls
