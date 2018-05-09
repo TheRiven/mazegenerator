@@ -54,7 +54,6 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // and join the two sets together
     let timer = Instant::now();
     while walls.len() > 0 {
-        //println!("Wall Count: {}", walls.len());
         let wall = pick_random_wall(&mut walls);
 
         let cell_a = wall.cell_a
