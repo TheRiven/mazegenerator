@@ -25,6 +25,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
 
     let timer = Instant::now();
 
+    println!("Kruskal - Generating Cells");
     // Create the Cells and sets
     let mut id = 1;
     let mut y = 1u32;
@@ -42,6 +43,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
 
     println!("Kruskal - Cell Generation Done in {:?}", timer.elapsed());
 
+    println!("Kruskal - Generating Walls");
     // List of walls
     let timer = Instant::now();
     let mut walls = create_wall_list(&cells);
@@ -52,6 +54,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // select a random wall and get the cells it connects
     // if the cells belong to diffrent sets, turn the wall into a cell
     // and join the two sets together
+    println!("Kruskal - Merging Cells Sets");
     let timer = Instant::now();
     while walls.len() > 0 {
         let wall = pick_random_wall(&mut walls);

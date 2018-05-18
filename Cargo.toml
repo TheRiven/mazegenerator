@@ -1,6 +1,6 @@
 [package]
 name = "mazegenerator"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["TheRiven <Novajames276@gmail.com>"]
 
 [dependencies]

@@ -45,7 +45,7 @@ pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
     let width = if width % 2 == 0 { width + 1 } else { width };
 
     let start_point = (1, 1);
-    let end_point = (height - 2, width - 2);
+    let end_point = (width - 2, height - 2);
 
     println!(
         "Finding path from point {:?} to {:?}",
