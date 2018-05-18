@@ -17,6 +17,7 @@ pub fn recursive_backtracker(height: u32, width: u32) -> HashSet<(u32, u32)> {
     let mut current = maze.get_cell(1, 1).unwrap();
     visited.insert((current.x, current.y));
 
+    println!("Generating Maze Paths...");
     // While there are unvisited cells --
     while visited.len() != (height * width) as usize {
         // Get the unvisted neighbours for the current cell
