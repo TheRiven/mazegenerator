@@ -52,8 +52,9 @@ pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
         start_point, end_point
     );
 
+    let solver = select_maze_solver();
     let timer = Instant::now();
-    let path = mazesolver::solve_maze(select_maze_solver(), &start_point, end_point, maze);
+    let path = mazesolver::solve_maze(solver, &start_point, end_point, maze);
 
     if path == None {
         println!("Something went wrong and no path was found!");

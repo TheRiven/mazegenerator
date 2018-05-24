@@ -84,50 +84,41 @@ fn move_person(_person: Person, position: (u32, u32), new_facing: Direction) -> 
     }
 }
 
-fn look_left(maze: &HashSet<(u32, u32)>, person: &Person) -> (Option<(u32, u32)>, Direction) {
+fn look_left(maze: &HashSet<(u32, u32)>, person: &Person) -> Option<((u32, u32), Direction)> {
     match person.facing {
-        Direction::North => (get_direction(&maze, &person, Direction::West), Direction::West),
-        Direction::East => (get_direction(&maze, &person, Direction::North), Direction::North),
-        Direction::South => (get_direction(&maze, &person, Direction::East), Direction::East),
-        Direction::West => (get_direction(&maze, &person, Direction::South), Direction::South),
+        Direction::North => get_cell_from_direction(maze, person, Direction::West),
+        Direction::East => get_cell_from_direction(maze, person, Direction::North),
+        Direction::South => get_cell_from_direction(maze, person, Direction::East),
+        Direction::West => get_cell_from_direction(maze, person, Direction::South),
     }
 }
 
-fn look_right(maze: &HashSet<(u32, u32)>, person: &Person) -> (Option<(u32, u32)>, Direction) {
+fn look_right(maze: &HashSet<(u32, u32)>, person: &Person) -> Option<((u32, u32), Direction)> {
     match person.facing {
-        Direction::North => (get_direction(&maze, &person, Direction::East), Direction::East),
-        Direction::East => (get_direction(&maze, &person, Direction::South), Direction::South),
-        Direction::South => (get_direction(&maze, &person, Direction::West), Direction::West),
-        Direction::West => (get_direction(&maze, &person, Direction::North), Direction::North),
+        Direction::North => get_cell_from_direction(maze, person, Direction::East),
+        Direction::East => get_cell_from_direction(maze, person, Direction::South),
+        Direction::South => get_cell_from_direction(maze, person, Direction::West),
+        Direction::West => get_cell_from_direction(maze, person, Direction::North),
     }
 }
 
 fn look_back(maze: &HashSet<(u32, u32)>, person: &Person) -> Option<((u32, u32), Direction)> {
     match person.facing {
-        Direction::North => {
-            match get_direction(&maze, &person, Direction::South) {
-                Some(position) => Some((position, Direction::South)),
-                None => None,
-            }            
-        },
-        Direction::East => {
-            match get_direction(&maze, &person, Direction::West) {
-                Some(position) => Some((position, Direction::West)),
-                None => None,
-            }
-        },
-        Direction::South => {
-            match get_direction(&maze, &person, Direction::North) {
-                Some(position) => Some((position, Direction::North)),
-                None => None,
-            }
-        },
-        Direction::West => {
-            match get_direction(&maze, &person, Direction::East) {
-                Some(position) => Some((position, Direction::East)),
-                None => None,
-            }
-        },
+        Direction::North => get_cell_from_direction(maze, person, Direction::South),
+        Direction::East => get_cell_from_direction(maze, person, Direction::West),
+        Direction::South => get_cell_from_direction(maze, person, Direction::North),
+        Direction::West => get_cell_from_direction(maze, person, Direction::East),
+    }
+}
+
+fn get_cell_from_direction(
+    maze: &HashSet<(u32, u32)>,
+    person: &Person,
+    dir: Direction,
+) -> Option<((u32, u32), Direction)> {
+    match get_direction(&maze, &person, dir) {
+        Some(position) => Some((position, dir)),
+        None => None,
     }
 }
 
@@ -136,17 +127,17 @@ fn find_next_step(maze: &HashSet<(u32, u32)>, person: &Person) -> ((u32, u32), D
     // if not look foward and move if there is a path.
     // if there is nothing left or foward, try right.
     // finaly if there is nothing else, go back.
-    if let (Some(left), dir) = look_left(&maze, &person) {
-        return (left, dir);
+    if let Some(left) = look_left(maze, person) {
+        return left;
     };
 
-    if let Some(forward) = get_direction(&maze, &person, person.facing) {
+    if let Some(forward) = get_direction(maze, person, person.facing) {
         return (forward, person.facing);
     };
 
-    if let (Some(right), dir) = look_right(&maze, &person) {
-        return (right, dir);
+    if let Some(right) = look_right(maze, person) {
+        return right;
     };
 
-    look_back(&maze, &person).expect("find_next_step -- No Path back from current location found!")
+    look_back(maze, person).expect("find_next_step -- No Path back from current location found!")
 }
