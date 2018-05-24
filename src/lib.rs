@@ -28,7 +28,7 @@ pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, 
     // Setup Timer
     let timer = Instant::now();
 
-    let generator = select_maze_solver(height, width);
+    let generator = select_maze_generator(height, width);
     let maze = mazebuilder::generate_maze(generator);
     println!("Maze Generated in {:?}", timer.elapsed());
 
@@ -53,7 +53,7 @@ pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
     );
 
     let timer = Instant::now();
-    let path = mazesolver::solve_maze(mazesolver::Solver::BFS, &start_point, end_point, maze);
+    let path = mazesolver::solve_maze(select_maze_solver(), &start_point, end_point, maze);
 
     if path == None {
         println!("Something went wrong and no path was found!");
@@ -78,7 +78,7 @@ fn save_solved_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>, path: V
     println!("Image saved in {:?}", timer.elapsed());
 }
 
-fn select_maze_solver(height: u32, width: u32) -> mazebuilder::Generator {
+fn select_maze_generator(height: u32, width: u32) -> mazebuilder::Generator {
     use std::io;
     let mut input = String::new();
 
@@ -87,7 +87,7 @@ fn select_maze_solver(height: u32, width: u32) -> mazebuilder::Generator {
     println!("2. Kruskal,");
     io::stdin()
         .read_line(&mut input)
-        .expect("select_maze_solver -- unable to parse console input!");
+        .expect("select_maze_generator -- unable to parse console input!");
 
     let option = match input.trim().parse::<u32>() {
         Ok(num) => num,
@@ -105,5 +105,33 @@ fn select_maze_solver(height: u32, width: u32) -> mazebuilder::Generator {
             mazebuilder::Generator::DFS {height, width}
         }
     }
+}
 
+fn select_maze_solver() -> mazesolver::Solver {
+    use std::io;
+    let mut input = String::new();
+
+    println!("Which maze solver do you want to use?");
+    println!("1. Breadth First Search,");
+    println!("2. Left-turn,");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("select_maze_solver -- unable to parse console input!");
+
+    let option = match input.trim().parse::<u32>() {
+        Ok(num) => num,
+        Err(err) => {
+            println!("Please enter a number! Error: {}", err);
+            std::process::exit(1);
+        }
+    };
+
+    match option {
+        1 => mazesolver::Solver::BFS,
+        2 => mazesolver::Solver::LeftTurn,
+        _ => {
+            println!("unrecognised option {}, defaulting to BFS", option);
+            mazesolver::Solver::BFS
+        }
+    }
 }
