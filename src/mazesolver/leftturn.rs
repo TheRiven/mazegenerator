@@ -41,7 +41,7 @@ pub fn left_first<'a>(
 
         // Check if we are at the end of the maze
         if (person.x, person.y) == end {
-            return Some(path);
+            return Some(reverse_path(path));
         }
 
         // Find the next position to move to.
@@ -140,4 +140,17 @@ fn find_next_step(maze: &HashSet<(u32, u32)>, person: &Person) -> ((u32, u32), D
     };
 
     look_back(maze, person).expect("find_next_step -- No Path back from current location found!")
+}
+
+fn reverse_path<'a>(mut path: Vec<&'a (u32, u32)>) -> Vec<&'a (u32, u32)> {
+    let mut reversed_path: Vec<&'a (u32, u32)> = Vec::new();
+
+    while path.len() > 0 {
+        reversed_path.push(
+            path.pop()
+                .expect("reverse_path -- failed to reverse the path"),
+        );
+    }
+
+    reversed_path
 }
