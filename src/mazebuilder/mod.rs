@@ -2,18 +2,21 @@ extern crate rand;
 mod dfs;
 mod kruskal;
 mod maze;
+mod dfs_imperfect;
 
 use std::collections::HashSet;
 
 pub enum Generator {
     DFS { height: u32, width: u32 },
     Kruskal { height: u32, width: u32 },
+    DfsImperfect { height: u32, width: u32},
 }
 
 pub fn generate_maze(gen: Generator) -> HashSet<(u32, u32)> {
     let maze = match gen {
         Generator::DFS { height, width } => dfs::recursive_backtracker(height, width),
         Generator::Kruskal { height, width } => kruskal::kruskal(height, width),
+        Generator::DfsImperfect { height, width} => dfs_imperfect::generate(height, width),
     };
 
     maze
