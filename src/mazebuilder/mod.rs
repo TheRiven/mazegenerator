@@ -79,21 +79,21 @@ mod tests {
         assert_eq!(test3.len(), 4999);
     }
 
-    // #[test]
-    // fn test_dfs_imperfect_10_10() {
-    //     let test1 = dfs_imperfect::generate(10, 10);
-    //     assert_eq!(test1.len(), 49);
-    // }
+    #[test]
+    fn test_dfs_imperfect_10_10() {
+        let test1 = dfs_imperfect::generate(10, 10);
+        assert_eq!(test1.len(), 49);
+    }
 
-    // #[test]
-    // fn test_dfs_imperfect_15_23() {
-    //     let test2 = dfs_imperfect::generate(15, 23);
-    //     assert_eq!(test2.len(), 153);
-    // }
+    #[test]
+    fn test_dfs_imperfect_15_23() {
+        let test2 = dfs_imperfect::generate(15, 23);
+        assert_eq!(test2.len(), 153);
+    }
 
-    // #[test]
-    // fn test_dfs_imperfect_100_100() {
-    //     let test3 = dfs_imperfect::generate(100, 100);
-    //     assert_eq!(test3.len(), 4999);
-    // }
+    #[test]
+    fn test_dfs_imperfect_100_100() {
+        let test3 = dfs_imperfect::generate(100, 100);
+        assert_eq!(test3.len(), 4999);
+    }
 }
