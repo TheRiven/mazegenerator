@@ -88,7 +88,7 @@ pub fn generate(height: u32, width: u32) -> HashSet<(u32, u32)> {
         } else {
             // if no position is found then backtrack and try again.
             let next = stack.pop().expect("Nothing Left in the stack!");
-            
+
             // add this position to the list of ends for creating more paths.
             if backtracking == false {
                 end_nodes.push(point.position);
@@ -100,8 +100,73 @@ pub fn generate(height: u32, width: u32) -> HashSet<(u32, u32)> {
     }
 
     println!("end nodes found: {}", end_nodes.len());
+    // Go through all nodes in the backtracker list and connect them with other nodes
+    // to create multiple paths through the maze
+    maze = connect_end_nodes(maze, end_nodes);
 
     convert_nodes_to_visited(maze)
+}
+
+fn connect_end_nodes(mut maze: Maze, end_nodes: Vec<Position>) -> Maze {
+    // For each end node
+    // Check which direction has already been used to get to this end node
+    // pick from the remaining directions that contain nodes
+    // change the wall between them into a node
+
+    for node in end_nodes {
+        let mut position;
+
+        {
+            // Get surrounding cells
+            let mut walls = Vec::new();
+
+            if let Some(north) = get_direction(Direction::North, node) {
+                let wall = find_wall_position(Point { position: node }, north);
+                if let Some(cell) = maze.map.get(&wall) {
+                    walls.push(cell);
+                }
+            }
+
+            if let Some(east) = get_direction(Direction::East, node) {
+                let wall = find_wall_position(Point { position: node }, east);
+                if let Some(cell) = maze.map.get(&wall) {
+                    walls.push(cell);
+                }
+            }
+
+            if let Some(south) = get_direction(Direction::South, node) {
+                let wall = find_wall_position(Point { position: node }, south);
+                if let Some(cell) = maze.map.get(&wall) {
+                    walls.push(cell);
+                }
+            }
+
+            if let Some(west) = get_direction(Direction::West, node) {
+                let wall = find_wall_position(Point { position: node }, west);
+                if let Some(cell) = maze.map.get(&wall) {
+                    walls.push(cell);
+                }
+            }
+
+            // Keep only the walls
+            walls.retain(|cell| match cell {
+                Cell::Node { position: _ } => false,
+                Cell::Wall { position: _ } => true,
+            });
+
+            // Pick one of those walls to be removed
+            let chosen = pick_random_position(walls);
+            position = match chosen {
+                Cell::Wall { position } => *position,
+                Cell::Node { position } => *position,
+            };
+        }
+
+        // Change the wall into a node
+        maze.map.insert(position, Cell::Node { position: position });
+    }
+
+    maze
 }
 
 fn move_to_position(mut maze: Maze, point: Point, target: Position) -> (Maze, Point) {
@@ -109,11 +174,16 @@ fn move_to_position(mut maze: Maze, point: Point, target: Position) -> (Maze, Po
     let wall_cell_position = find_wall_position(point, target);
 
     // Change both cells to be nodes
-    maze.map.insert(target, Cell::Node {position: target});
-    maze.map.insert(wall_cell_position, Cell::Node {position: wall_cell_position});
+    maze.map.insert(target, Cell::Node { position: target });
+    maze.map.insert(
+        wall_cell_position,
+        Cell::Node {
+            position: wall_cell_position,
+        },
+    );
 
     // Change position to be at the new node
-    let point = Point { position: target};
+    let point = Point { position: target };
 
     (maze, point)
 }
@@ -152,12 +222,10 @@ fn get_next_position(maze: &Maze, position: Position) -> Option<Position> {
     };
 
     // Remove the cells that we cannot move to
-    next_positions.retain(|cell| {
-        match cell {
-            Cell::Node {position:_} => false,
-            Cell::Wall {position:_} => true,
-        }
-    } );
+    next_positions.retain(|cell| match cell {
+        Cell::Node { position: _ } => false,
+        Cell::Wall { position: _ } => true,
+    });
 
     if next_positions.len() == 0 {
         return None;
@@ -267,30 +335,46 @@ mod tests {
     #[test]
     fn test_move_to_position() {
         let maze = Maze::new(21, 21);
-        let point = Point {position: Position {x: 1, y:1}};
-        let position = Position {x: 3, y: 1};
+        let point = Point {
+            position: Position { x: 1, y: 1 },
+        };
+        let position = Position { x: 3, y: 1 };
 
-        let (new_maze, new_point) = move_to_position(maze, point, position); 
+        let (new_maze, new_point) = move_to_position(maze, point, position);
 
-        assert_eq!(new_point.position, position  );
+        assert_eq!(new_point.position, position);
 
-        let test = new_maze.map.get(&position).expect("test_move_to_position -- unable to find new node!");
-        assert_eq!(match test {
-            Cell::Node {position: _} => true,
-            Cell::Wall {position: _} => false,
-        }, true);
+        let test = new_maze
+            .map
+            .get(&position)
+            .expect("test_move_to_position -- unable to find new node!");
+        assert_eq!(
+            match test {
+                Cell::Node { position: _ } => true,
+                Cell::Wall { position: _ } => false,
+            },
+            true
+        );
 
-        let test2 =  new_maze.map.get(&Position {x: 2, y: 1}).expect("test_move_to_position -- unable to find new node!");
-        assert_eq!(match test2 {
-            Cell::Node {position: _} => true,
-            Cell::Wall {position: _} => false,
-        }, true);
+        let test2 = new_maze
+            .map
+            .get(&Position { x: 2, y: 1 })
+            .expect("test_move_to_position -- unable to find new node!");
+        assert_eq!(
+            match test2 {
+                Cell::Node { position: _ } => true,
+                Cell::Wall { position: _ } => false,
+            },
+            true
+        );
     }
 
     #[test]
-    fn test_find_wall_position(){
-        let point = Point {position: Position {x: 1, y:1}};
-        let position = Position {x: 3, y: 1};
+    fn test_find_wall_position() {
+        let point = Point {
+            position: Position { x: 1, y: 1 },
+        };
+        let position = Position { x: 3, y: 1 };
 
         let wall_pos = find_wall_position(point, position);
 
