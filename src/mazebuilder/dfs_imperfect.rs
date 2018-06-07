@@ -110,49 +110,16 @@ pub fn generate(height: u32, width: u32) -> HashSet<(u32, u32)> {
 fn connect_end_nodes(mut maze: Maze, end_nodes: Vec<Position>) -> Maze {
     // For each end node
     // Check which direction has already been used to get to this end node
-    // pick from the remaining directions that contain nodes
+    // pick from the remaining directions that contain walls
     // change the wall between them into a node
 
     for node in end_nodes {
         let mut position;
 
+        // Inner Scope to contain references
         {
-            // Get surrounding cells
-            let mut walls = Vec::new();
-
-            if let Some(north) = get_direction(Direction::North, node) {
-                let wall = find_wall_position(Point { position: node }, north);
-                if let Some(cell) = maze.map.get(&wall) {
-                    walls.push(cell);
-                }
-            }
-
-            if let Some(east) = get_direction(Direction::East, node) {
-                let wall = find_wall_position(Point { position: node }, east);
-                if let Some(cell) = maze.map.get(&wall) {
-                    walls.push(cell);
-                }
-            }
-
-            if let Some(south) = get_direction(Direction::South, node) {
-                let wall = find_wall_position(Point { position: node }, south);
-                if let Some(cell) = maze.map.get(&wall) {
-                    walls.push(cell);
-                }
-            }
-
-            if let Some(west) = get_direction(Direction::West, node) {
-                let wall = find_wall_position(Point { position: node }, west);
-                if let Some(cell) = maze.map.get(&wall) {
-                    walls.push(cell);
-                }
-            }
-
-            // Keep only the walls
-            walls.retain(|cell| match cell {
-                Cell::Node { position: _ } => false,
-                Cell::Wall { position: _ } => true,
-            });
+            // Get surrounding walls
+            let mut walls = get_walls_for_position(&maze, node);
 
             // Pick one of those walls to be removed
             let chosen = pick_random_position(walls);
@@ -167,6 +134,45 @@ fn connect_end_nodes(mut maze: Maze, end_nodes: Vec<Position>) -> Maze {
     }
 
     maze
+}
+
+fn get_wall_for_position(maze: &Maze, direction: Direction, position: Position) -> Option<&Cell> {
+    if let Some(pos) = get_direction(direction, position) {
+        let wall = find_wall_position(Point { position }, pos);
+        if let Some(cell) = maze.map.get(&wall) {
+            return Some(cell);
+        }
+    }
+
+    None
+}
+
+fn get_walls_for_position(maze: &Maze, node: Position) -> Vec<&Cell> {
+    let mut walls = Vec::new();
+
+    if let Some(north) = get_wall_for_position(maze, Direction::North, node) {
+        walls.push(north);
+    }
+
+    if let Some(east) = get_wall_for_position(maze, Direction::East, node) {
+        walls.push(east);
+    }
+
+    if let Some(south) = get_wall_for_position(maze, Direction::South, node) {
+        walls.push(south);
+    }
+
+    if let Some(west) = get_wall_for_position(maze, Direction::West, node) {
+        walls.push(west);
+    }
+
+    // Keep only the walls
+    walls.retain(|cell| match cell {
+        Cell::Node { position: _ } => false,
+        Cell::Wall { position: _ } => true,
+    });
+
+    walls
 }
 
 fn move_to_position(mut maze: Maze, point: Point, target: Position) -> (Maze, Point) {
