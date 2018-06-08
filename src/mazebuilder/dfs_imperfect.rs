@@ -6,6 +6,15 @@ enum Cell {
     Wall { position: Position },
 }
 
+impl Cell {
+    fn get_position(&self) -> Position {
+        match self {
+            Cell::Node { position } => *position,
+            Cell::Wall { position } => *position,
+        }
+    }
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 struct Position {
     x: u32,
@@ -25,6 +34,8 @@ struct Point {
 }
 
 struct Maze {
+    height: u32,
+    width: u32,
     map: HashMap<Position, Cell>,
 }
 
@@ -47,7 +58,7 @@ impl Maze {
         };
         map.insert(start_pos, start_node);
 
-        Maze { map }
+        Maze { height, width, map }
     }
 }
 
@@ -70,6 +81,8 @@ pub fn generate(height: u32, width: u32) -> HashSet<(u32, u32)> {
         position: Position { x: 1, y: 1 },
     };
     stack.push(point.position);
+
+    println!("Generating Maze Paths...");
 
     // While there are cells in the stack
     while stack.len() > 0 {
@@ -99,10 +112,12 @@ pub fn generate(height: u32, width: u32) -> HashSet<(u32, u32)> {
         }
     }
 
+    println!("Path generation finished.");
     println!("end nodes found: {}", end_nodes.len());
     // Go through all nodes in the backtracker list and connect them with other nodes
     // to create multiple paths through the maze
     maze = connect_end_nodes(maze, end_nodes);
+    println!("Alternative paths generated.");
 
     convert_nodes_to_visited(maze)
 }
@@ -123,10 +138,7 @@ fn connect_end_nodes(mut maze: Maze, end_nodes: Vec<Position>) -> Maze {
 
             // Pick one of those walls to be removed
             let chosen = pick_random_position(walls);
-            position = match chosen {
-                Cell::Wall { position } => *position,
-                Cell::Node { position } => *position,
-            };
+            position = chosen.get_position();
         }
 
         // Change the wall into a node
@@ -170,6 +182,22 @@ fn get_walls_for_position(maze: &Maze, node: Position) -> Vec<&Cell> {
     walls.retain(|cell| match cell {
         Cell::Node { position: _ } => false,
         Cell::Wall { position: _ } => true,
+    });
+
+    walls.retain(|cell| {
+        let position = cell.get_position();
+
+        let mut test = true;
+
+        if position.x > maze.width - 2 {
+            test = false;
+        }
+
+        if position.y > maze.height - 2 {
+            test = false;
+        }
+
+        test
     });
 
     walls
@@ -239,10 +267,7 @@ fn get_next_position(maze: &Maze, position: Position) -> Option<Position> {
 
     let next = pick_random_position(next_positions);
 
-    match next {
-        Cell::Node { position } => Some(*position),
-        Cell::Wall { position } => Some(*position),
-    }
+    Some(next.get_position())
 }
 
 fn get_cell_from_direction(maze: &Maze, position: Position, dir: Direction) -> Option<&Cell> {
