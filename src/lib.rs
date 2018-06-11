@@ -54,7 +54,7 @@ pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
 
     let solver = select_maze_solver();
     let timer = Instant::now();
-    let path = mazesolver::solve_maze(solver, &start_point, end_point, maze);
+    let path = mazesolver::solve_maze(solver, start_point, end_point, maze);
 
     if path == None {
         println!("Something went wrong and no path was found!");
@@ -117,6 +117,7 @@ fn select_maze_solver() -> mazesolver::Solver {
     println!("Which maze solver do you want to use?");
     println!("1. Breadth First Search,");
     println!("2. Left-turn,");
+    println!("3. A*,");
     io::stdin()
         .read_line(&mut input)
         .expect("select_maze_solver -- unable to parse console input!");
@@ -132,6 +133,7 @@ fn select_maze_solver() -> mazesolver::Solver {
     match option {
         1 => mazesolver::Solver::BFS,
         2 => mazesolver::Solver::LeftTurn,
+        3 => mazesolver::Solver::AStar,
         _ => {
             println!("unrecognised option {}, defaulting to BFS", option);
             mazesolver::Solver::BFS
