@@ -12,8 +12,8 @@ pub fn solve(start: Node, end: Node, maze: &HashSet<Node>) -> Option<Vec<&Node>>
     let mut closed_set: HashSet<&Node> = HashSet::new();
 
     // Set of known nodes that have not yet been evaluated
-    let mut open_set = Vec::new();
-    open_set.push(start_node);
+    let mut open_set = HashSet::new();
+    open_set.insert(start_node);
 
     // Map of each node and how best to get to it
     let mut came_from: HashMap<&Node, &Node> = HashMap::new();
@@ -43,16 +43,15 @@ pub fn solve(start: Node, end: Node, maze: &HashSet<Node>) -> Option<Vec<&Node>>
     println!("Finding Path with A*");
     // Start looping through the open set
     while open_set.len() > 0 {
-        let (index, current) = find_lowest_fcost(&open_set, &f_score);
+        let current = find_lowest_fcost(&open_set, &f_score).expect("No lowest Scoring node found!");
 
         if current == goal_node {
             println!("End found, generating path.");
             return Some(construct_path(came_from, current, goal_node));
         }
 
-        open_set.remove(index);
+        open_set.remove(current);
         closed_set.insert(current);
-        closed_set.remove(&current);
 
         for neighbour in get_node_neighbours(current, maze) {
             // check if the neighbour has already been looked at
@@ -61,8 +60,8 @@ pub fn solve(start: Node, end: Node, maze: &HashSet<Node>) -> Option<Vec<&Node>>
             }
 
             // Add it to the list to be looked at if it is not already in there
-            if check_open_set_contains(neighbour, &open_set) == false {
-                open_set.push(neighbour);
+            if open_set.contains(neighbour) == false {
+                open_set.insert(neighbour);
             }
 
             // work out the distance from start to a neighbour
@@ -86,20 +85,20 @@ pub fn solve(start: Node, end: Node, maze: &HashSet<Node>) -> Option<Vec<&Node>>
 }
 
 fn find_lowest_fcost<'a>(
-    nodes: &Vec<&'a Node>,
+    nodes: &HashSet<&'a Node>,
     f_costs: &HashMap<&'a Node, f32>,
-) -> (usize, &'a Node) {
+) -> Option<&'a Node> {
     let mut lowest_cost = f32::INFINITY;
-    let mut result = 0;
+    let mut result = None;
 
-    for (index, node) in nodes.iter().enumerate() {
+    for node in nodes {
         if f_costs[node] < lowest_cost {
             lowest_cost = f_costs[node];
-            result = index;
+            result = Some(*node);
         }
     }
 
-    (result, nodes[result])
+    result
 }
 
 fn distance_between(_node: Node, _other: Node) -> f32 {
@@ -206,14 +205,4 @@ fn get_west<'a>(node: &Node, maze: &'a HashSet<Node>) -> Option<&'a Node> {
     }
 
     None
-}
-
-fn check_open_set_contains(node: &Node, list: &[&Node]) -> bool {
-    for item in list {
-        if *item == node {
-            return true;
-        }
-    }
-
-    false
 }
