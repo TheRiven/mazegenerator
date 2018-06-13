@@ -40,17 +40,19 @@ pub fn solve(start: Node, end: Node, maze: &HashSet<Node>) -> Option<Vec<&Node>>
         g_score[start_node] + heuristic_cost(start_node, goal_node),
     );
 
+    println!("Finding Path with A*");
     // Start looping through the open set
     while open_set.len() > 0 {
         let (index, current) = find_lowest_fcost(&open_set, &f_score);
 
         if current == goal_node {
-            //came_from.insert(goal_node, current);
-            return Some(construct_path(came_from, current));
+            println!("End found, generating path.");
+            return Some(construct_path(came_from, current, goal_node));
         }
 
         open_set.remove(index);
         closed_set.insert(current);
+        closed_set.remove(&current);
 
         for neighbour in get_node_neighbours(current, maze) {
             // check if the neighbour has already been looked at
@@ -121,8 +123,10 @@ fn heuristic_cost(node: &Node, goal: &Node) -> f32 {
 fn construct_path<'a>(
     came_from: HashMap<&'a Node, &'a Node>,
     mut current: &'a Node,
+    end_node: &'a Node,
 ) -> Vec<&'a Node> {
     let mut path = Vec::new();
+    path.push(end_node);
 
     while came_from.contains_key(current) {
         current = came_from[current];
