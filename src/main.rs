@@ -12,7 +12,11 @@ fn main() {
     match mode {
         1 => {
             let maze = mazegenerator::create_and_save_maze(height, width);
-            mazegenerator::solve_maze(height, width, &maze);
+            let mut solve = true;
+            while solve {
+                mazegenerator::solve_maze(height, width, &maze);
+                solve = get_solver_retry();
+            }
         }
         2 => {
             let _maze = mazegenerator::create_and_save_maze(height, width);
@@ -54,6 +58,24 @@ fn get_maze_size() -> (u32, u32) {
     let width = parse_u32(&input);
 
     (height, width)
+}
+
+fn get_solver_retry() -> bool {
+    println!("Do you want to run another solver?");
+    println!("1. Yes");
+    println!("2. No");
+
+    let mut input = String::new();
+
+    io::stdin()
+        .read_line(&mut input)
+        .expect("get_solver_retry -- unable to parse console input!");
+
+    match parse_u32(&input) {
+        1 => true,
+        2 => false,
+        _ => false,
+    }
 }
 
 fn parse_u32(text: &String) -> u32 {
