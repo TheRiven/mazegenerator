@@ -16,11 +16,11 @@ enum Direction {
 }
 
 // Entry function
-pub fn left_first<'a>(
-    start: &'a (u32, u32),
+pub fn left_first(
+    start: (u32, u32),
     end: (u32, u32),
-    maze: &'a HashSet<(u32, u32)>,
-) -> Option<Vec<&'a (u32, u32)>> {
+    maze: &HashSet<(u32, u32)>,
+) -> Option<Vec<&(u32, u32)>> {
     // Create a person at the start of the maze
     let mut person = Person {
         x: start.0,
@@ -29,7 +29,7 @@ pub fn left_first<'a>(
     };
 
     let at_end = true;
-    let mut path: Vec<&'a (u32, u32)> = Vec::new();
+    let mut path = Vec::new();
 
     // While the person is not at the end of the maze
     while at_end {

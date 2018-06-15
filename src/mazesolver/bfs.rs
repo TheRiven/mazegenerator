@@ -2,11 +2,11 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
-pub fn breadth_first_search<'a>(
-    start: &'a (u32, u32),
+pub fn breadth_first_search(
+    start: (u32, u32),
     end: (u32, u32),
-    maze: &'a HashSet<(u32, u32)>,
-) -> Option<Vec<&'a (u32, u32)>> {
+    maze: &HashSet<(u32, u32)>,
+) -> Option<Vec<&(u32, u32)>> {
     // A FIFO Set
     let mut open_set: VecDeque<&(u32, u32)> = VecDeque::new();
 
@@ -17,7 +17,7 @@ pub fn breadth_first_search<'a>(
     let mut meta: HashMap<&(u32, u32), &(u32, u32)> = HashMap::new();
 
     // Setup
-    let root = &start;
+    let root = maze.get(&start).expect("Unable to find starting node in maze!");
     meta.insert(&root, &root);
     open_set.push_back(root);
 
