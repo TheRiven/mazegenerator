@@ -21,7 +21,9 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     let mut cells: HashSet<Rc<Cell>> = HashSet::new();
 
     // Map of Cell sets
-    let mut cell_sets: HashMap<Rc<Cell>, u32> = HashMap::new();
+    let mut cell_sets: HashMap<u32, Vec<Rc<Cell>>> = HashMap::new();
+    // Map of cells with their sets
+    let mut cell_set_list: HashMap<Rc<Cell>, u32> = HashMap::new();
 
     let timer = Instant::now();
 
@@ -34,7 +36,8 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
         while x < width {
             let new_cell = Rc::new(Cell { x, y });
             cells.insert(new_cell.clone());
-            cell_sets.insert(new_cell, id);
+            cell_sets.insert(id, vec![new_cell.clone()]);
+            cell_set_list.insert(new_cell, id);
             x += 2;
             id += 1;
         }
@@ -59,26 +62,33 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     while walls.len() > 0 {
         let wall = pick_random_wall(&mut walls);
 
-        let cell_a = wall.cell_a
+        let cell_a = wall
+            .cell_a
             .upgrade()
             .expect("Found a wall without a Cell_a");
-        let cell_b = wall.cell_b
+        let cell_b = wall
+            .cell_b
             .upgrade()
             .expect("Found a wall without a Cell_b");
 
-        let cell_a_set = cell_sets[&cell_a];
-        let cell_b_set = cell_sets[&cell_b];
+        let cell_a_set = cell_set_list[&cell_a];
+        let cell_b_set = cell_set_list[&cell_b];
 
         if cell_a_set != cell_b_set {
             // Join the sets together here and then add the wall (now cell)
             // to it.
-            let unified_set_id = join_cell_sets(cell_a_set, cell_b_set, &mut cell_sets);
+            let unified_set_id =
+                join_cell_sets(cell_a_set, cell_b_set, &mut cell_sets, &mut cell_set_list);
             let wall_cell = Rc::new(Cell {
                 x: wall.x,
                 y: wall.y,
             });
             cells.insert(wall_cell.clone());
-            cell_sets.insert(wall_cell, unified_set_id);
+            cell_set_list.insert(wall_cell.clone(), unified_set_id);
+            cell_sets
+                .get_mut(&unified_set_id)
+                .expect("No Cell set for this ID found!")
+                .push(wall_cell);
         }
     }
 
@@ -199,13 +209,26 @@ fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Rc<Cell>>) -> Vec<&'
     neighbour_list
 }
 
-fn join_cell_sets(set_a: u32, set_b: u32, sets: &mut HashMap<Rc<Cell>, u32>) -> u32 {
-    // find all of the cells that are in the other set and bring them into the first
-    for (_, value) in sets.iter_mut() {
-        if *value == set_b {
-            *value = set_a;
-        }
+fn join_cell_sets(
+    set_a: u32,
+    set_b: u32,
+    set_map: &mut HashMap<u32, Vec<Rc<Cell>>>,
+    cell_map: &mut HashMap<Rc<Cell>, u32>,
+) -> u32 {
+    let mut set_old = set_map
+        .remove(&set_b)
+        .expect("Unable to find Set B to remove from sets map!");
+
+    for cell in &mut set_old {
+        cell_map
+            .entry(cell.clone())
+            .and_modify(|value| *value = set_a);
     }
+
+    set_map
+        .get_mut(&set_a)
+        .expect("Unable to find Set A to update from sets map!")
+        .append(&mut set_old);
 
     set_a
 }
