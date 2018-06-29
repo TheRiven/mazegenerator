@@ -56,8 +56,14 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     // and join the two sets together
     println!("Kruskal - Merging Cells Sets");
     let timer = Instant::now();
+    let start_walls_count = walls.len() as f32;
     while walls.len() > 0 {
         let wall = pick_random_wall(&mut walls);
+
+        let percent_done = 100f32 - (walls.len() as f32 / start_walls_count) * 100f32;
+        if (percent_done % 5f32) == 0f32 {
+            println!("{}% Done", percent_done);
+        }
 
         let cell_a = wall.cell_a
             .upgrade()
