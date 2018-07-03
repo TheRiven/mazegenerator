@@ -27,8 +27,8 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<Cell> {
     while y < height {
         let mut x = 1u32;
         while x < width {
-            let new_cell = (x,y);
-            cells.insert(new_cell.clone());
+            let new_cell = (x, y);
+            cells.insert(new_cell);
             cell_sets.insert(new_cell, id);
             x += 2;
             id += 1;
@@ -69,10 +69,10 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<Cell> {
         if cell_a_set != cell_b_set {
             // Join the sets together here and then add the wall (now cell)
             // to it.
-            let unified_set_id = join_cell_sets(cell_a_set, cell_b_set, &mut cell_sets);
+            cell_sets = join_cell_sets(cell_a_set, cell_b_set, cell_sets);
             let wall_cell = (wall.x, wall.y);
             cells.insert(wall_cell.clone());
-            cell_sets.insert(wall_cell, unified_set_id);
+            cell_sets.insert(wall_cell, cell_a_set);
         }
     }
 
@@ -176,16 +176,16 @@ fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Cell>) -> Vec<Cell> 
         }
     }
 
-    if let Some(east) = cells.get(&(x + 2, y )) {
+    if let Some(east) = cells.get(&(x + 2, y)) {
         neighbour_list.push(*east);
     }
 
-    if let Some(south) = cells.get(&(x, y + 2 )) {
+    if let Some(south) = cells.get(&(x, y + 2)) {
         neighbour_list.push(*south);
     }
 
     if x > 1 {
-        if let Some(west) = cells.get(&(x - 2, y )) {
+        if let Some(west) = cells.get(&(x - 2, y)) {
             neighbour_list.push(*west);
         }
     }
@@ -193,7 +193,7 @@ fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Cell>) -> Vec<Cell> 
     neighbour_list
 }
 
-fn join_cell_sets(set_a: u32, set_b: u32, sets: &mut HashMap<Cell, u32>) -> u32 {
+fn join_cell_sets(set_a: u32, set_b: u32, mut sets: HashMap<Cell, u32>) -> HashMap<Cell, u32> {
     // find all of the cells that are in the other set and bring them into the first
     for (_, value) in sets.iter_mut() {
         if *value == set_b {
@@ -201,5 +201,5 @@ fn join_cell_sets(set_a: u32, set_b: u32, sets: &mut HashMap<Cell, u32>) -> u32 
         }
     }
 
-    set_a
+    sets
 }
