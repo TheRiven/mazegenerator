@@ -15,14 +15,14 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<Cell> {
     // List of cells in the maze
     let mut cells: HashSet<Cell> = HashSet::new();
 
-    // Map of Cell sets
-    let mut cell_sets: HashMap<Cell, u32> = HashMap::new();
+    // Map of Cell sets for lookup
+    let mut cell_sets: HashMap<Cell, usize> = HashMap::new();
 
     let timer = Instant::now();
 
     println!("Kruskal - Generating Cells");
     // Create the Cells and sets
-    let mut id = 1;
+    let mut id = 0;
     let mut y = 1u32;
     while y < height {
         let mut x = 1u32;
@@ -35,6 +35,9 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<Cell> {
         }
         y += 2;
     }
+
+    // Disjointed-set data structure of all sets for rapid merging.
+    let mut disjoint_sets = DisjointSets::new(cells.len());
 
     println!("Kruskal - Cell Generation Done in {:?}", timer.elapsed());
 
@@ -63,13 +66,13 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<Cell> {
         let cell_a = wall.cell_a;
         let cell_b = wall.cell_b;
 
-        let cell_a_set = cell_sets[&cell_a];
-        let cell_b_set = cell_sets[&cell_b];
+        let cell_a_set = disjoint_sets.find(cell_sets[&cell_a]);
+        let cell_b_set = disjoint_sets.find(cell_sets[&cell_b]);
 
         if cell_a_set != cell_b_set {
             // Join the sets together here and then add the wall (now cell)
             // to it.
-            cell_sets = join_cell_sets(cell_a_set, cell_b_set, cell_sets);
+            disjoint_sets = join_cell_sets(cell_a_set, cell_b_set, disjoint_sets);
             let wall_cell = (wall.x, wall.y);
             cells.insert(wall_cell.clone());
             cell_sets.insert(wall_cell, cell_a_set);
@@ -193,13 +196,43 @@ fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Cell>) -> Vec<Cell> 
     neighbour_list
 }
 
-fn join_cell_sets(set_a: u32, set_b: u32, mut sets: HashMap<Cell, u32>) -> HashMap<Cell, u32> {
+fn join_cell_sets(set_a: usize, set_b: usize, mut sets: DisjointSets) -> DisjointSets {
     // find all of the cells that are in the other set and bring them into the first
-    for (_, value) in sets.iter_mut() {
-        if *value == set_b {
-            *value = set_a;
+    sets.merge(set_b, set_a);
+
+    sets
+}
+
+/// Disjoint Sets from rust-algorithims by EbTech,
+/// Represents a union of disjoint sets. Each set's elements are arranged in a
+/// tree, whose root is the set's representative.
+pub struct DisjointSets {
+    parent: Vec<usize>,
+}
+
+impl DisjointSets {
+    /// Initializes disjoint sets containing one element each.
+    pub fn new(size: usize) -> Self {
+        Self {
+            parent: (0..size).collect(),
         }
     }
 
-    sets
+    /// Finds the set's representative. Do path compression along the way to make
+    /// future queries faster.
+    pub fn find(&mut self, u: usize) -> usize {
+        let pu = self.parent[u];
+        if pu != u {
+            self.parent[u] = self.find(pu);
+        }
+        self.parent[u]
+    }
+
+    /// Merges the sets containing u and v into a single set containing their
+    /// union. Returns true if u and v were previously in different sets.
+    pub fn merge(&mut self, u: usize, v: usize) -> bool {
+        let (pu, pv) = (self.find(u), self.find(v));
+        self.parent[pu] = pv;
+        pu != pv
+    }
 }
