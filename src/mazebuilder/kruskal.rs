@@ -1,45 +1,43 @@
 use rand::distributions::{IndependentSample, Range};
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::rc::{Rc, Weak};
 use std::time::Instant;
 
-#[derive(Eq, Hash, PartialEq)]
-struct Cell {
-    pub x: u32,
-    pub y: u32,
-}
+type Cell = (u32, u32);
 
 struct Wall {
-    pub cell_a: Weak<Cell>,
-    pub cell_b: Weak<Cell>,
+    pub cell_a: Cell,
+    pub cell_b: Cell,
     pub x: u32,
     pub y: u32,
 }
 
-pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
+pub fn kruskal(height: u32, width: u32) -> HashSet<Cell> {
     // List of cells in the maze
-    let mut cells: HashSet<Rc<Cell>> = HashSet::new();
+    let mut cells: HashSet<Cell> = HashSet::new();
 
-    // Map of Cell sets
-    let mut cell_sets: HashMap<Rc<Cell>, u32> = HashMap::new();
+    // Map of Cell sets for lookup
+    let mut cell_sets: HashMap<Cell, usize> = HashMap::new();
 
     let timer = Instant::now();
 
     println!("Kruskal - Generating Cells");
     // Create the Cells and sets
-    let mut id = 1;
+    let mut id = 0;
     let mut y = 1u32;
     while y < height {
         let mut x = 1u32;
         while x < width {
-            let new_cell = Rc::new(Cell { x, y });
-            cells.insert(new_cell.clone());
+            let new_cell = (x, y);
+            cells.insert(new_cell);
             cell_sets.insert(new_cell, id);
             x += 2;
             id += 1;
         }
         y += 2;
     }
+
+    // Disjointed-set data structure of all sets for rapid merging.
+    let mut disjoint_sets = DisjointSets::new(cells.len());
 
     println!("Kruskal - Cell Generation Done in {:?}", timer.elapsed());
 
@@ -65,26 +63,19 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
             println!("{}% Done", percent_done);
         }
 
-        let cell_a = wall.cell_a
-            .upgrade()
-            .expect("Found a wall without a Cell_a");
-        let cell_b = wall.cell_b
-            .upgrade()
-            .expect("Found a wall without a Cell_b");
+        let cell_a = wall.cell_a;
+        let cell_b = wall.cell_b;
 
-        let cell_a_set = cell_sets[&cell_a];
-        let cell_b_set = cell_sets[&cell_b];
+        let cell_a_set = disjoint_sets.find(cell_sets[&cell_a]);
+        let cell_b_set = disjoint_sets.find(cell_sets[&cell_b]);
 
         if cell_a_set != cell_b_set {
             // Join the sets together here and then add the wall (now cell)
             // to it.
-            let unified_set_id = join_cell_sets(cell_a_set, cell_b_set, &mut cell_sets);
-            let wall_cell = Rc::new(Cell {
-                x: wall.x,
-                y: wall.y,
-            });
+            disjoint_sets = join_cell_sets(cell_a_set, cell_b_set, disjoint_sets);
+            let wall_cell = (wall.x, wall.y);
             cells.insert(wall_cell.clone());
-            cell_sets.insert(wall_cell, unified_set_id);
+            cell_sets.insert(wall_cell, cell_a_set);
         }
     }
 
@@ -96,7 +87,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     let mut visited: HashSet<(u32, u32)> = HashSet::new();
 
     for cell in cells.drain() {
-        visited.insert((cell.x, cell.y));
+        visited.insert((cell.0, cell.1));
     }
 
     println!("Path generation finished.");
@@ -104,7 +95,7 @@ pub fn kruskal(height: u32, width: u32) -> HashSet<(u32, u32)> {
     visited
 }
 
-fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
+fn create_wall_list(cells: &HashSet<Cell>) -> Vec<Wall> {
     // List of walls
     let mut walls: Vec<Wall> = Vec::new();
 
@@ -113,11 +104,11 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
 
     // For each cell, Find its neighbours and create a wall between them
     // then move to the neighbours and repeat untill no more walls can be made.
-    let mut cell_stack: VecDeque<&Rc<Cell>> = VecDeque::new();
+    let mut cell_stack: VecDeque<Cell> = VecDeque::new();
     let first_cell = cells
-        .get(&Cell { x: 1, y: 1 })
+        .get(&(1, 1))
         .expect("Unable to find cell 1, 1 in cells set");
-    cell_stack.push_back(first_cell);
+    cell_stack.push_back(*first_cell);
 
     println!("Cells: {}", cells.len());
 
@@ -129,15 +120,15 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
         visited.insert(current);
 
         cell_neighbours.into_iter().for_each(|cell| {
-            if !visited.contains(cell) {
-                let mut x = (cell.x - current.x) as i32;
+            if !visited.contains(&cell) {
+                let mut x = (cell.0 - current.0) as i32;
                 if x > 0 {
                     x = x - 1
                 };
                 if x < 0 {
                     x = x + 1
                 };
-                let mut y = (cell.y - current.y) as i32;
+                let mut y = (cell.1 - current.1) as i32;
                 if y > 0 {
                     y = y - 1
                 };
@@ -145,12 +136,12 @@ fn create_wall_list(cells: &HashSet<Rc<Cell>>) -> Vec<Wall> {
                     y = y + 1
                 };
 
-                let x = (current.x as i32 + x) as u32;
-                let y = (current.y as i32 + y) as u32;
+                let x = (current.0 as i32 + x) as u32;
+                let y = (current.1 as i32 + y) as u32;
 
                 let new_wall = Wall {
-                    cell_a: Rc::downgrade(&current),
-                    cell_b: Rc::downgrade(&cell),
+                    cell_a: current,
+                    cell_b: cell,
                     x,
                     y,
                 };
@@ -176,42 +167,72 @@ fn pick_random_wall(walls: &mut Vec<Wall>) -> Wall {
     chosen
 }
 
-fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Rc<Cell>>) -> Vec<&'a Rc<Cell>> {
-    let x = cell.x;
-    let y = cell.y;
+fn find_cell_neighbours<'a>(cell: &Cell, cells: &'a HashSet<Cell>) -> Vec<Cell> {
+    let x = cell.0;
+    let y = cell.1;
 
-    let mut neighbour_list: Vec<&Rc<Cell>> = Vec::new();
+    let mut neighbour_list: Vec<Cell> = Vec::new();
 
     if y > 1 {
-        if let Some(north) = cells.get(&Cell { x: x, y: y - 2 }) {
-            neighbour_list.push(north);
+        if let Some(north) = cells.get(&(x, y - 2)) {
+            neighbour_list.push(*north);
         }
     }
 
-    if let Some(east) = cells.get(&Cell { x: x + 2, y: y }) {
-        neighbour_list.push(east);
+    if let Some(east) = cells.get(&(x + 2, y)) {
+        neighbour_list.push(*east);
     }
 
-    if let Some(south) = cells.get(&Cell { x: x, y: y + 2 }) {
-        neighbour_list.push(south);
+    if let Some(south) = cells.get(&(x, y + 2)) {
+        neighbour_list.push(*south);
     }
 
     if x > 1 {
-        if let Some(west) = cells.get(&Cell { x: x - 2, y: y }) {
-            neighbour_list.push(west);
+        if let Some(west) = cells.get(&(x - 2, y)) {
+            neighbour_list.push(*west);
         }
     }
 
     neighbour_list
 }
 
-fn join_cell_sets(set_a: u32, set_b: u32, sets: &mut HashMap<Rc<Cell>, u32>) -> u32 {
+fn join_cell_sets(set_a: usize, set_b: usize, mut sets: DisjointSets) -> DisjointSets {
     // find all of the cells that are in the other set and bring them into the first
-    for (_, value) in sets.iter_mut() {
-        if *value == set_b {
-            *value = set_a;
+    sets.merge(set_b, set_a);
+
+    sets
+}
+
+/// Disjoint Sets from rust-algorithims by EbTech,
+/// Represents a union of disjoint sets. Each set's elements are arranged in a
+/// tree, whose root is the set's representative.
+pub struct DisjointSets {
+    parent: Vec<usize>,
+}
+
+impl DisjointSets {
+    /// Initializes disjoint sets containing one element each.
+    pub fn new(size: usize) -> Self {
+        Self {
+            parent: (0..size).collect(),
         }
     }
 
-    set_a
+    /// Finds the set's representative. Do path compression along the way to make
+    /// future queries faster.
+    pub fn find(&mut self, u: usize) -> usize {
+        let pu = self.parent[u];
+        if pu != u {
+            self.parent[u] = self.find(pu);
+        }
+        self.parent[u]
+    }
+
+    /// Merges the sets containing u and v into a single set containing their
+    /// union. Returns true if u and v were previously in different sets.
+    pub fn merge(&mut self, u: usize, v: usize) -> bool {
+        let (pu, pv) = (self.find(u), self.find(v));
+        self.parent[pu] = pv;
+        pu != pv
+    }
 }
