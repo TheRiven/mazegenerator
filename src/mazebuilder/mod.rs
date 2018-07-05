@@ -1,6 +1,5 @@
 extern crate rand;
 mod dfs;
-mod dfs_imperfect;
 mod imperfect;
 mod kruskal;
 mod maze;
@@ -10,14 +9,12 @@ use std::collections::HashSet;
 pub enum Generator {
     DFS { height: u32, width: u32 },
     Kruskal { height: u32, width: u32 },
-    DfsImperfect { height: u32, width: u32 },
 }
 
 pub fn generate_maze(gen: Generator, imperfect: bool) -> HashSet<(u32, u32)> {
     let mut maze = match gen {
         Generator::DFS { height, width } => dfs::recursive_backtracker(height, width),
         Generator::Kruskal { height, width } => kruskal::kruskal(height, width),
-        Generator::DfsImperfect { height, width } => dfs_imperfect::generate(height, width),
     };
 
     if imperfect {
