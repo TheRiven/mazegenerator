@@ -1,23 +1,28 @@
 extern crate rand;
 mod dfs;
+mod dfs_imperfect;
+mod imperfect;
 mod kruskal;
 mod maze;
-mod dfs_imperfect;
 
 use std::collections::HashSet;
 
 pub enum Generator {
     DFS { height: u32, width: u32 },
     Kruskal { height: u32, width: u32 },
-    DfsImperfect { height: u32, width: u32},
+    DfsImperfect { height: u32, width: u32 },
 }
 
-pub fn generate_maze(gen: Generator) -> HashSet<(u32, u32)> {
-    let maze = match gen {
+pub fn generate_maze(gen: Generator, imperfect: bool) -> HashSet<(u32, u32)> {
+    let mut maze = match gen {
         Generator::DFS { height, width } => dfs::recursive_backtracker(height, width),
         Generator::Kruskal { height, width } => kruskal::kruskal(height, width),
-        Generator::DfsImperfect { height, width} => dfs_imperfect::generate(height, width),
+        Generator::DfsImperfect { height, width } => dfs_imperfect::generate(height, width),
     };
+
+    if imperfect {
+        maze = imperfect::generate(maze);
+    }
 
     maze
 }
@@ -37,8 +42,8 @@ mod tests {
             width: 10,
         };
 
-        let result1 = generate_maze(dfs_test);
-        let result2 = generate_maze(kruskal_test);
+        let result1 = generate_maze(dfs_test, false);
+        let result2 = generate_maze(kruskal_test, false);
 
         assert_eq!(result1.len(), result2.len());
     }
@@ -78,5 +83,19 @@ mod tests {
         let test3 = kruskal::kruskal(100, 100);
         assert_eq!(test3.len(), 4999);
     }
-    
+
+    #[test]
+    fn test_kruskal_imperfect() {
+        let mut maze = kruskal::kruskal(100, 100);
+        maze = imperfect::generate(maze);
+        assert_eq!(maze.len(), 5004);
+    }
+
+    #[test]
+    fn test_dfs_imperfect() {
+        let mut maze = dfs::recursive_backtracker(100, 100);
+        maze = imperfect::generate(maze);
+        assert_eq!(maze.len(), 5004);
+    }
+
 }
