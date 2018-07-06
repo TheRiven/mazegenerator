@@ -29,7 +29,7 @@ pub fn create_and_save_maze(maze_height: u32, maze_width: u32) -> HashSet<(u32, 
     let timer = Instant::now();
 
     let generator = select_maze_generator(height, width);
-    let maze = mazebuilder::generate_maze(generator);
+    let maze = mazebuilder::generate_maze(generator, select_imperfect());
     println!("Maze Generated in {:?}", timer.elapsed());
 
     save_maze(height, width, &maze);
@@ -62,7 +62,7 @@ pub fn solve_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
         println!("We have a path!");
         println!("Maze solved in {:?}", timer.elapsed());
         save_solved_maze(height, width, maze, path.unwrap());
-    }    
+    }
 }
 
 fn save_maze(height: u32, width: u32, maze: &HashSet<(u32, u32)>) {
@@ -86,7 +86,6 @@ fn select_maze_generator(height: u32, width: u32) -> mazebuilder::Generator {
     println!("Which maze generator do you want to use?");
     println!("1. Depth First Search,");
     println!("2. Kruskal,");
-    println!("3. DFS Imperfect,");
     io::stdin()
         .read_line(&mut input)
         .expect("select_maze_generator -- unable to parse console input!");
@@ -100,12 +99,11 @@ fn select_maze_generator(height: u32, width: u32) -> mazebuilder::Generator {
     };
 
     match option {
-        1 => mazebuilder::Generator::DFS {height, width},
-        2 => mazebuilder::Generator::Kruskal {height, width},
-        3 => mazebuilder::Generator::DfsImperfect {height, width},
+        1 => mazebuilder::Generator::DFS { height, width },
+        2 => mazebuilder::Generator::Kruskal { height, width },
         _ => {
             println!("unrecognised option {}, defaulting to DFS", option);
-            mazebuilder::Generator::DFS {height, width}
+            mazebuilder::Generator::DFS { height, width }
         }
     }
 }
@@ -137,6 +135,35 @@ fn select_maze_solver() -> mazesolver::Solver {
         _ => {
             println!("unrecognised option {}, defaulting to BFS", option);
             mazesolver::Solver::BFS
+        }
+    }
+}
+
+fn select_imperfect() -> bool {
+    use std::io;
+    let mut input = String::new();
+
+    println!("Do you want to generate an imperfect maze?");
+    println!("1. Yes");
+    println!("2. No");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("select_imperfect -- unable to parse console input!");
+
+    let option = match input.trim().parse::<u32>() {
+        Ok(num) => num,
+        Err(err) => {
+            println!("Please enter a number! Error: {}", err);
+            std::process::exit(1);
+        }
+    };
+
+    match option {
+        1 => true,
+        2 => false,
+        _ => {
+            println!("unrecognised option {}, defaulting to false", option);
+            false
         }
     }
 }
