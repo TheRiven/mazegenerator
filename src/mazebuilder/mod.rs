@@ -83,30 +83,14 @@ mod tests {
 
     #[test]
     fn test_kruskal_imperfect() {
-        let mut maze = kruskal::kruskal(100, 100);
-        maze = imperfect::generate(maze);
-        assert!(
-            match maze.len() {
-                5036 ..= 5039 => true,
-                _ => false,
-            },
-            "Wrong Maze length: {}. Should be between 5036 and 5039",
-            maze.len()
-        );
+        let maze = kruskal::kruskal(100, 100);
+        let _test = imperfect::generate(maze);
     }
 
     #[test]
     fn test_dfs_imperfect() {
-        let mut maze = dfs::recursive_backtracker(100, 100);
-        maze = imperfect::generate(maze);
-        assert!(
-            match maze.len() {
-                5011 ..= 5013 => true,
-                _ => false,
-            },
-            "Wrong Maze Length: {}. Should be between 5011 and 5013",
-            maze.len()
-        );
+        let maze = dfs::recursive_backtracker(100, 100);
+        let _test = imperfect::generate(maze);
     }
 
 }
