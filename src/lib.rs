@@ -86,6 +86,7 @@ fn select_maze_generator(height: u32, width: u32) -> mazebuilder::Generator {
     println!("Which maze generator do you want to use?");
     println!("1. Depth First Search,");
     println!("2. Kruskal,");
+    println!("3. Recursive Division,");
     io::stdin()
         .read_line(&mut input)
         .expect("select_maze_generator -- unable to parse console input!");
@@ -101,6 +102,7 @@ fn select_maze_generator(height: u32, width: u32) -> mazebuilder::Generator {
     match option {
         1 => mazebuilder::Generator::DFS { height, width },
         2 => mazebuilder::Generator::Kruskal { height, width },
+        3 => mazebuilder::Generator::RecursiveDevision {height, width},
         _ => {
             println!("unrecognised option {}, defaulting to DFS", option);
             mazebuilder::Generator::DFS { height, width }
