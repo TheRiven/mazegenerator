@@ -98,4 +98,9 @@ mod tests {
         let _test = imperfect::generate(maze);
     }
 
+    #[test]
+    fn test_recursive_division_50_50() {
+        let _maze = recursive_division::generate(50, 50);
+    }
+
 }
