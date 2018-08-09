@@ -17,8 +17,8 @@ struct Chamber {
 
 struct Maze {
     cells: HashMap<Position, Cell>,
-    height: u32,
-    width: u32,
+    //height: u32,
+    //width: u32,
 }
 
 impl Maze {
@@ -42,8 +42,8 @@ impl Maze {
 
         Maze {
             cells: maze_cells,
-            height,
-            width,
+            //height,
+            //width,
         }
     }
 
@@ -60,6 +60,35 @@ impl Maze {
                 "Check Wall -- Tried to find cell at invalid position: {:?}",
                 position
             ),
+        }
+    }
+
+    fn update_maze_cell(&mut self, position: Position, cell: Cell) {
+        let cell_status = match self.cells.get(&position) {
+            Some(status) => match status {
+                Cell::Wall => Cell::Wall,
+                Cell::Door => Cell::Door,
+                Cell::Space => Cell::Space,
+            },
+            None => panic!("Found no cell at: {:?}", position),
+        };
+
+        match cell {
+            Cell::Wall => match cell_status {
+                Cell::Space => {
+                    let _ = self.cells.insert(position, cell);
+                }
+                Cell::Door => panic!("Tried to place a wall on a door at {:?}", position),
+                Cell::Wall => panic!("Tried to place a wall on another wall at {:?}", position),
+            },
+            Cell::Door => match cell_status {
+                Cell::Wall => {
+                    let _ = self.cells.insert(position, cell);
+                }
+                Cell::Door => panic!("Tried to place a door on another door at {:?}", position),
+                Cell::Space => panic!("Tried to place a door in open space at {:?}", position),
+            },
+            Cell::Space => panic!("Tried to place a open space after maze creation!"),
         }
     }
 }
@@ -134,18 +163,18 @@ fn divide_chamber(chamber: Chamber, verticle_wall: bool, mut maze: Maze) -> Maze
     // Create door in wall
     let index = pick_random_u32(0, wall_list.len() as u32) as usize;
     let door_position = wall_list[index];
-    maze.cells.insert(door_position, Cell::Door);
+    maze.update_maze_cell(door_position, Cell::Door);
 
     // Divide the chamber into two using the door as the reference point
     let chambers = create_sub_chambers(door_position, verticle_wall, &maze);
 
-    for sub_chamber in chambers {
-        println!(
-            "Dividing chamber {:?} with Height {} and width {}",
-            sub_chamber.top_left, chamber.height, chamber.width
-        );
-        maze = divide_chamber(sub_chamber, !verticle_wall, maze);
-    }
+    // for sub_chamber in chambers {
+    //     println!(
+    //         "Dividing chamber {:?} with Height {} and width {}",
+    //         sub_chamber.top_left, sub_chamber.height, sub_chamber.width
+    //     );
+    //     maze = divide_chamber(sub_chamber, !verticle_wall, maze);
+    // }
 
     maze
 }
@@ -157,11 +186,11 @@ fn create_verticle_wall(
     wall_list: &mut Vec<Position>,
 ) {
     let y_start = chamber.top_left.1;
-    let y_end = chamber.top_left.1 + chamber.height - 1;
+    let y_end = chamber.top_left.1 + chamber.height;
 
     for y in y_start..y_end {
         let position = (wall_x, y);
-        maze.cells.insert(position, Cell::Wall);
+        maze.update_maze_cell(position, Cell::Wall);
         wall_list.push(position);
     }
 }
@@ -173,11 +202,11 @@ fn create_horizontal_wall(
     wall_list: &mut Vec<Position>,
 ) {
     let x_start = chamber.top_left.0;
-    let x_end = chamber.top_left.0 + chamber.width - 1;
+    let x_end = chamber.top_left.0 + chamber.width;
 
     for x in x_start..x_end {
         let position = (x, wall_y);
-        maze.cells.insert(position, Cell::Wall);
+        maze.update_maze_cell(position, Cell::Wall);
         wall_list.push(position);
     }
 }
@@ -240,37 +269,37 @@ fn create_new_chamber(start: Position, maze: &Maze) -> Chamber {
             current_pos
         );
     }
-    let mut next_pos = (current_pos.0 - 1, current_pos.1);
+    let mut next_pos = west(current_pos);
     while !maze.check_wall(next_pos) {
         current_pos = next_pos;
-        next_pos = (current_pos.0 - 1, current_pos.1);
+        next_pos = west(current_pos);
     }
     let top_x = current_pos.0;
 
     // move up until there is no more room to get the y.
-    next_pos = (current_pos.0, current_pos.1 - 1);
+    next_pos = north(current_pos);
     while !maze.check_wall(next_pos) {
         current_pos = next_pos;
-        next_pos = (current_pos.0, current_pos.1 - 1);
+        next_pos = north(current_pos);
     }
     let top_y = current_pos.1;
 
     // find the height
     let mut height = 1u32;
-    next_pos = (current_pos.0, current_pos.1 + 1);
+    next_pos = south(current_pos);
     while !maze.check_wall(next_pos) {
         current_pos = next_pos;
         height += 1;
-        next_pos = (current_pos.0, current_pos.1 + 1);
+        next_pos = south(current_pos);
     }
 
     // find the width
     let mut width = 1u32;
-    next_pos = (current_pos.0 + 1, current_pos.1);
+    next_pos = east(current_pos);
     while !maze.check_wall(next_pos) {
         current_pos = next_pos;
         width += 1;
-        next_pos = (current_pos.0 + 1, current_pos.1);
+        next_pos = east(current_pos);
     }
 
     Chamber {
