@@ -17,22 +17,16 @@ struct Chamber {
 
 struct Maze {
     cells: HashMap<Position, Cell>,
-    //height: u32,
-    //width: u32,
 }
 
 impl Maze {
     fn new(height: u32, width: u32) -> Maze {
         let mut maze_cells = HashMap::new();
-        for x in 0..width + 1 {
-            for y in 0..height + 1 {
-                if x == 0 {
+        for x in 0..width {
+            for y in 0..height {
+                if x == 0 || y == 0 {
                     maze_cells.insert((x, y), Cell::Wall);
-                } else if y == 0 {
-                    maze_cells.insert((x, y), Cell::Wall);
-                } else if x == width {
-                    maze_cells.insert((x, y), Cell::Wall);
-                } else if y == height {
+                } else if x == width - 1 || y == height - 1 {
                     maze_cells.insert((x, y), Cell::Wall);
                 } else {
                     maze_cells.insert((x, y), Cell::Space);
@@ -42,8 +36,6 @@ impl Maze {
 
         Maze {
             cells: maze_cells,
-            //height,
-            //width,
         }
     }
 
@@ -186,7 +178,7 @@ fn create_verticle_wall(
     wall_list: &mut Vec<Position>,
 ) {
     let y_start = chamber.top_left.1;
-    let y_end = chamber.top_left.1 + chamber.height;
+    let y_end = chamber.top_left.1 + chamber.height - 1;
 
     for y in y_start..y_end {
         let position = (wall_x, y);
@@ -202,7 +194,7 @@ fn create_horizontal_wall(
     wall_list: &mut Vec<Position>,
 ) {
     let x_start = chamber.top_left.0;
-    let x_end = chamber.top_left.0 + chamber.width;
+    let x_end = chamber.top_left.0 + chamber.width - 1;
 
     for x in x_start..x_end {
         let position = (x, wall_y);
